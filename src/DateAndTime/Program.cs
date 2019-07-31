@@ -13,7 +13,9 @@ namespace DateAndTime
             // good practice to always work with UTC date time
 
             // TimeZoneInfoDateTime();
-            DateAndTimeOffset();
+            // DateAndTimeOffset();
+            // FormatDates();
+            DateTimeArithmetic();
 
         }
         static void TimeZoneInfoDateTime()
@@ -75,8 +77,65 @@ namespace DateAndTime
 
             // DateTime.Parse is leveraging the local systems timzone when parsing dates
             var date2 = "9/10/2019 10:00:00 PM +02:00";
-            var parsedDate2 = DateTime.Parse(date2);
-            System.Console.WriteLine("DateTime.Parse: " + parsedDate2);
+            // always parse using UTC
+            var parsedDate2 = DateTime.Parse(date2, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
+            System.Console.WriteLine("DateTime.Parse: " + parsedDate2 + " - Kind: " + parsedDate2.Kind);
+        }
+
+        static void FormatDates()
+        {
+            System.Console.WriteLine("------------- Formatting dates -------------");
+            var date = "9/10/2019 10:00:00 PM";
+            var parsedDate = DateTimeOffset.ParseExact(date, "M/d/yyyy h:mm:ss tt", CultureInfo.InvariantCulture);
+            parsedDate = parsedDate.ToOffset(TimeSpan.FromHours(10));
+            // "s" string format represents ISO8601
+            // var formattedDate = parsedDate.ToString("s");
+
+            // "o" preserves time zone information with ISO 8601. Good for serializing
+            // https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings#Roundtrip
+            var formattedDate = parsedDate.ToString("o");
+            System.Console.WriteLine(formattedDate);
+
+            System.Console.WriteLine("-------------------- UTC to Local-----------------");
+            // DateTimeOffset UtcNow is always used for the current time and serialized. Convert it to local time only on client side to avoid DateTime ambiguity
+            // changing to DateTime.UtcNow will ignore the timezone which will cause problems
+            var now = DateTimeOffset.UtcNow;
+            System.Console.WriteLine(now.ToLocalTime());
+
+            System.Console.WriteLine("-------------------- Local Time to UTC -----------------");
+            var nowLocal = DateTimeOffset.Now;
+            System.Console.WriteLine(nowLocal.ToLocalTime());
+
+        }
+
+        static void DateTimeArithmetic()
+        {
+            System.Console.WriteLine("---------------- Calculating Timespan Representations ----------------");
+
+            // 60 hours, 100 minutes, 200 seconds = 2 days, 13 hours, 43 minutes, and 20 seconds
+            var timeSpan = new TimeSpan(60, 100, 200);
+            // timespan allows to convert the time given into a required representation of the time.
+            System.Console.WriteLine("Timespan Hours: " + timeSpan.Hours);
+            System.Console.WriteLine("Timespan Total Days: " + timeSpan.TotalDays);
+
+            System.Console.WriteLine("---------------- Calculating Time Difference ----------------");
+            var start = DateTimeOffset.UtcNow;
+            var end = start.AddSeconds(50);
+
+            TimeSpan difference = end - start;
+            System.Console.WriteLine("Timespan Difference: " + difference);
+            System.Console.WriteLine("Timespan Difference Seconds: " + difference.Seconds);
+            System.Console.WriteLine("Timespan Difference Milliseconds: " + difference.Milliseconds);
+            System.Console.WriteLine("Timespan Difference Total Seconds: " + difference.TotalSeconds);
+            System.Console.WriteLine("Timespan Difference Total Minutes: " + difference.TotalMinutes);
+
+            TimeSpan twiceTime = difference.Multiply(2);
+            System.Console.WriteLine("Timespan Twice Difference: " + twiceTime);
+            System.Console.WriteLine("Timespan Twice Difference Seconds: " + twiceTime.Seconds);
+            System.Console.WriteLine("Timespan Twice Difference Milliseconds: " + twiceTime.Milliseconds);
+            System.Console.WriteLine("Timespan Twice Difference Total Seconds: " + twiceTime.TotalSeconds);
+            System.Console.WriteLine("Timespan Twice Difference Total Minutes: " + twiceTime.TotalMinutes);
+
 
 
         }
