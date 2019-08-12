@@ -15,7 +15,9 @@ namespace DateAndTime
             // TimeZoneInfoDateTime();
             // DateAndTimeOffset();
             // FormatDates();
-            DateTimeArithmetic();
+            // DateTimeArithmetic();
+            // WeekNumber();
+            ExtendingDates();
 
         }
         static void TimeZoneInfoDateTime()
@@ -136,8 +138,43 @@ namespace DateAndTime
             System.Console.WriteLine("Timespan Twice Difference Total Seconds: " + twiceTime.TotalSeconds);
             System.Console.WriteLine("Timespan Twice Difference Total Minutes: " + twiceTime.TotalMinutes);
 
+        }
+        static void WeekNumber()
+        {
+            Calendar calendar = CultureInfo.InvariantCulture.Calendar;
+            var start = new DateTimeOffset(2010, 3, 2, 0, 0, 0, TimeSpan.Zero);
+            var week = calendar.GetWeekOfYear(start.DateTime, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+            System.Console.WriteLine(week);
 
+            // var isoWeek = ISOWeek.GetWeekOfYear(start.DateTime)  // .net core 3
+        }
+        static void ExtendingDates()
+        {
+            var contractDate = new DateTimeOffset(2019, 7, 15, 0, 0, 0, TimeSpan.Zero);
+            System.Console.WriteLine($"Contract Date: {contractDate}");
 
+            // the AddTick will get contract to end the day before. ex.. Decemeber 31st 11:59pm rather than January 1
+            var contractDate1 = contractDate.AddMonths(6).AddTicks(-1);
+            System.Console.WriteLine($"Extended by 6 months: {contractDate1}");
+
+            // use the new ExtendContract method to get contract to end exactly at the end of the month
+            var contractDate2 = ExtendContract(contractDate, 6);
+            System.Console.WriteLine($"Extending 6 months till end of month: {contractDate2}");
+        }
+        
+        /// <summary>
+        /// Extend a contract by the whole month and not by just adding a months time.
+        /// ex. 02-29 to 03-28 should actually be 02-29 to 03-31
+        /// </summary>
+        /// <param name="current"></param>
+        /// <param name="months"></param>
+        /// <returns></returns>
+        static DateTimeOffset ExtendContract(DateTimeOffset current, int months)
+        {
+            // add months to get the current month this contract should end
+            var newContractDate = current.AddMonths(months).AddTicks(-1);
+            return new DateTimeOffset(newContractDate.Year, newContractDate.Month, 
+                DateTime.DaysInMonth(newContractDate.Year, newContractDate.Month), 23, 59, 59, current.Offset);
         }
     }
 }
