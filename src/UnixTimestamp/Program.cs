@@ -12,6 +12,8 @@ namespace UnixTimestamp
             var result = unixDateStart.AddSeconds(timestamp);
 
             Console.WriteLine(new DateTimeOffset(result).ToUnixTimeSeconds());
+            // get date from unix timestamp in seconds
+            Console.WriteLine(DateTimeOffset.FromUnixTimeSeconds(timestamp));
 
             Console.WriteLine(result);
         }

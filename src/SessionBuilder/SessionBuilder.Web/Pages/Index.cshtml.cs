@@ -79,7 +79,7 @@ namespace SessionBuilder.Web.Pages
             // select first session that comes after the current session
                 .FirstOrDefault(session => session.Id != currentSession.Id &&
                 session.ScheduledAt >= currentSession.ScheduledAt);
-            
+
             // return minimum timespan to indicate that a session could not be found
             if (nextSession == null) return TimeSpan.MinValue;
 
@@ -102,10 +102,13 @@ namespace SessionBuilder.Web.Pages
         public int GetSpeakerAge()
         {
             var today = DateTime.UtcNow.Date;
+            // this will tell the age as soon as January 1st is hit for a new year. If the birthday is on june 21 then it will be displayed early
             var age = today.Year - Speaker.Birthday.Year;
 
+            // check if the current date as a whole including months and days is greater than todays date minus the age in years
             if (Speaker.Birthday.Date > today.Date.AddYears(-age))
             {
+                // if it is greater than it means the birthday is in a later month within this year so we subract 1 year
                 age -= 1;
             }
 
@@ -115,11 +118,19 @@ namespace SessionBuilder.Web.Pages
         public int GetDaysUntilNextBirthday()
         {
             var today = DateTime.UtcNow.Date;
+            // date of birthday in the current year.
+            // Defaulting day to 1 here to avoid issues like a leap year where adding the wrong number 
+            // of days can cause an ArgumentOutOfRangeException but will work fine in other years.
             var birthday = new DateTime(today.Year, Speaker.Birthday.Month, 1);
+            // add the days here to avoid leap year issues. Subract "1" so the birthday is not shown 
+            // as the day after since the default was on the first day and now we're adding the total 
+            // number of days with that additinal one day.
             birthday = birthday.AddDays(Speaker.Birthday.Day - 1);
 
+            // birthday has already passed
             if (birthday < today)
             {
+                // since birthday has passed, the year is incremented by 1 to adjust
                 birthday = new DateTime(today.Year + 1, Speaker.Birthday.Month, 1);
                 birthday = birthday.AddDays(Speaker.Birthday.Day - 1);
             }
